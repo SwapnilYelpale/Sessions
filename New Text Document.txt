@@ -1,0 +1,287 @@
+package com.jlt.pojo;
+
+public class EmployeeDetails {
+	private int employeeId;
+	private String name;
+	private double salary;
+	private String password;
+
+	public EmployeeDetails() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public EmployeeDetails(int employeeId, String name, double salary, String password) {
+		super();
+		this.employeeId = employeeId;
+		this.name = name;
+		this.salary = salary;
+		this.password = password;
+	}
+
+	public int getEmployeeId() {
+		return employeeId;
+	}
+
+	public void setEmployeeId(int employeeId) {
+		this.employeeId = employeeId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(double salary) {
+		this.salary = salary;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return "EmployeeDetails [employeeId=" + employeeId + ", name=" + name + ", salary=" + salary + ", password="
+				+ password + "]";
+	}
+
+}
+=================================================================================================================================
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>New Employee</title>
+</head>
+<body>
+	<h3>New Employee</h3>
+	<hr>
+	<form action="AddNewEmployeeServlet" method="post">
+		<table>
+			<tr>
+				<td>Employee ID</td>
+				<td><input type="text" name="txtEmployeeId"></td>
+			</tr>
+			<tr>
+				<td>Name</td>
+				<td><input type="text" name="txtName"></td>
+			</tr>
+			<tr>
+				<td>Salary</td>
+				<td><input type="text" name="txtSalary"></td>
+			</tr>
+			<tr>
+				<td>Password</td>
+				<td><input type="text" name="txtPassword"></td>
+			</tr>
+			<tr>
+				<td><input type="submit" value="Add Employee"></td>
+				<td><input type="reset" value="Clear"></td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>
+
+=================================================================================================================================
+package com.jlt.controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.jlt.pojo.EmployeeDetails;
+
+@WebServlet("/AddNewEmployeeServlet")
+public class AddNewEmployeeServlet extends HttpServlet {
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("text/html");
+
+
+		int employeeId = Integer.valueOf(request.getParameter("txtEmployeeId"));
+		String name = request.getParameter("txtName");
+		double salary = Double.valueOf(request.getParameter("txtSalary"));
+		String password = request.getParameter("txtPassword");
+
+		EmployeeDetails employeeDetails = new EmployeeDetails(employeeId, name, salary, password);
+
+		System.out.println(employeeDetails);
+
+		HttpSession httpSession = request.getSession();
+		httpSession.setAttribute("employee", employeeDetails);
+
+		PrintWriter out = response.getWriter();
+out.println("<h3>Employee registration success !!<h3><a href=EmployeeLogin.html>Login</a>");
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher("NewEmployee.html");
+		dispatcher.include(request, response);
+	}
+
+}
+
+=================================================================================================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Employee Login</title>
+</head>
+<body>
+	<h3>Employee Login</h3>
+	<hr>
+	<form action="EmployeeLoginServlet" method="post">
+		<table>
+			<tr>
+				<td>Employee ID</td>
+				<td><input type="text" name="txtEmployeeId"></td>
+			</tr>
+			<tr>
+				<td>Password</td>
+				<td><input type="text" name="txtPassword"></td>
+			</tr>
+			<tr>
+				<td><input type="submit" value="Login"></td>
+				<td><input type="reset" value="Clear"></td>
+			</tr>
+		</table>
+		<br> <a href="NewEmployee.html">New Employee Registration</a>
+	</form>
+</body>
+</html>
+
+================================================================================================================
+package com.jlt.controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.jlt.pojo.EmployeeDetails;
+
+@WebServlet("/EmployeeLoginServlet")
+public class EmployeeLoginServlet extends HttpServlet {
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		int employeeId = Integer.valueOf(request.getParameter("txtEmployeeId"));
+		String password = request.getParameter("txtPassword");
+
+		HttpSession httpSession = request.getSession();
+		EmployeeDetails details = (EmployeeDetails) httpSession.getAttribute("employee");
+
+		System.out.println(details);
+
+		PrintWriter out = response.getWriter();
+		if (details != null) {
+	if (details.getEmployeeId() == employeeId && details.getPassword().equals(password))
+				response.sendRedirect("HomeServlet");
+			else {
+				out.println("<h3>Invalid EmployeeId or Password !!<h3>");
+			}
+		} else {
+			out.println("<h3>Invalid EmployeeId or Password !!<h3>");
+		}
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher("EmployeeLogin.html");
+		dispatcher.include(request, response);
+
+	}
+
+}
+=========================================================================================================================
+package com.jlt.controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.jlt.pojo.EmployeeDetails;
+
+@WebServlet("/HomeServlet")
+public class HomeServlet extends HttpServlet {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		HttpSession httpSession = request.getSession();
+		EmployeeDetails details = (EmployeeDetails) httpSession.getAttribute("employee");
+
+		PrintWriter out = response.getWriter();
+
+		if (details != null) {
+			out.println("<h3>Hello " + details.getName() + "</h3>");
+			out.println("<a href=LogoutServlet>Logout</a>");
+
+		}
+
+	}
+
+}
+==================================================================================================
+package com.jlt.controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.jlt.pojo.EmployeeDetails;
+
+/**
+ * Servlet implementation class LogoutServlet
+ */
+@WebServlet("/LogoutServlet")
+public class LogoutServlet extends HttpServlet {
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession httpSession = request.getSession();
+		httpSession.invalidate();
+
+		PrintWriter out = response.getWriter();
+		out.println("<h3>Logged Out Successfull !!<h3>");
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher("EmployeeLogin.html");
+		dispatcher.include(request, response);
+	}
+
+}
+
